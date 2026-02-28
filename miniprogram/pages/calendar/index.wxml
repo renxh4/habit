@@ -1,0 +1,48 @@
+<view class="calendar-page">
+  <view class="calendar-header">
+    <view class="calendar-nav-btn" bindtap="onPrevMonth">
+      <text class="calendar-nav-icon">‹</text>
+    </view>
+    <text class="calendar-header-title">{{year}}年 {{month}}月</text>
+    <view class="calendar-nav-btn" bindtap="onNextMonth">
+      <text class="calendar-nav-icon">›</text>
+    </view>
+  </view>
+
+  <view class="calendar-main">
+    <view class="calendar-week-row">
+      <text class="calendar-week-label" wx:for="{{weekDays}}" wx:key="*this">
+        {{item}}
+      </text>
+    </view>
+    <view class="calendar-grid">
+      <block wx:for="{{days}}" wx:key="dateKey">
+        <view
+          class="calendar-day {{item.isCurrentMonth ? '' : 'calendar-day-out'}} {{item.isToday ? 'calendar-day-today' : ''}} {{item.hasCheck ? 'calendar-day-has-check' : ''}}"
+          data-date="{{item.dateKey}}"
+          bindtap="onSelectDate"
+        >
+          <text class="calendar-day-text">{{item.date}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="calendar-habits-card">
+    <view class="calendar-habits-header">
+      <text class="calendar-habits-date">{{selectedDateText}}</text>
+      <text class="calendar-habits-subtitle">{{selectedDateSummary}}</text>
+    </view>
+    <view class="calendar-habits-list">
+      <block wx:for="{{selectedHabits}}" wx:key="id">
+        <view class="calendar-habit-item">
+          <view class="calendar-habit-dot {{item.completed ? 'calendar-habit-dot-on' : ''}}"></view>
+          <text class="calendar-habit-name">{{item.name}}</text>
+        </view>
+      </block>
+      <view wx:if="{{!selectedHabits.length}}" class="calendar-habits-empty">
+        <text>今天还没有打卡记录</text>
+      </view>
+    </view>
+  </view>
+</view>

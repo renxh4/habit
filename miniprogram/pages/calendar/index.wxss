@@ -1,0 +1,158 @@
+page {
+  background-color: #f6f8f7;
+}
+
+.calendar-page {
+  padding: 64rpx 48rpx 192rpx;
+  box-sizing: border-box;
+}
+
+.calendar-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.calendar-header-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.calendar-nav-btn {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 9999rpx;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(15, 23, 42, 0.06);
+}
+
+.calendar-nav-icon {
+  font-size: 40rpx;
+  color: #64748b;
+}
+
+.calendar-main {
+  background-color: #ffffff;
+  border-radius: 32rpx;
+  padding: 32rpx 24rpx 40rpx;
+  box-sizing: border-box;
+  box-shadow: 0 16rpx 48rpx rgba(15, 23, 42, 0.06);
+}
+
+.calendar-week-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.calendar-week-label {
+  flex: 1;
+  text-align: center;
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.calendar-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.calendar-day {
+  width: 14.28%;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-day-text {
+  width: 64rpx;
+  height: 64rpx;
+  text-align: center;
+  line-height: 64rpx;
+  border-radius: 9999rpx;
+  font-size: 28rpx;
+  color: #0f172a;
+}
+
+.calendar-day-out .calendar-day-text {
+  color: #cbd5f5;
+}
+
+.calendar-day-has-check .calendar-day-text {
+  background-color: rgba(73, 223, 128, 0.12);
+  color: #22c55e;
+}
+
+.calendar-day-today .calendar-day-text {
+  background-color: #22c55e;
+  color: #ffffff;
+}
+
+.calendar-habits-card {
+  margin-top: 32rpx;
+  padding: 32rpx 24rpx;
+  border-radius: 32rpx;
+  background-color: #ffffff;
+  box-shadow: 0 16rpx 48rpx rgba(15, 23, 42, 0.06);
+}
+
+.calendar-habits-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24rpx;
+}
+
+.calendar-habits-date {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.calendar-habits-subtitle {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.calendar-habits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.calendar-habit-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.calendar-habit-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 9999rpx;
+  margin-right: 16rpx;
+  background-color: #e2e8f0;
+}
+
+.calendar-habit-dot-on {
+  background-color: #22c55e;
+}
+
+.calendar-habit-name {
+  font-size: 28rpx;
+  color: #0f172a;
+}
+
+.calendar-habits-empty {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #94a3b8;
+}

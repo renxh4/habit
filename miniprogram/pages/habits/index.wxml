@@ -1,0 +1,71 @@
+<view class="habit-page">
+  <view class="habit-header">
+    <view class="habit-header-left">
+      <text class="habit-header-label">TODAY</text>
+      <text class="habit-header-date">{{dateText}}</text>
+    </view>
+    <view class="habit-add-btn" bindtap="onAddHabit">
+      <text class="habit-add-plus">+</text>
+    </view>
+  </view>
+
+  <view class="habit-section">
+    <view class="habit-section-header">
+      <text class="habit-section-title">正在进行</text>
+      <text class="habit-section-subtitle">{{pendingCount}} 个待完成</text>
+    </view>
+  </view>
+
+  <view class="habit-list">
+    <block wx:for="{{habits}}" wx:key="id">
+      <view
+        class="habit-swipe-item"
+        data-id="{{item.id}}"
+        bindtouchstart="onHabitTouchStart"
+        bindtouchmove="onHabitTouchMove"
+        bindtouchend="onHabitTouchEnd"
+      >
+        <view
+          class="habit-swipe-inner"
+          style="transform: translateX({{item.offsetX || 0}}rpx);"
+        >
+          <view
+            class="habit-item {{item.completed ? 'habit-item-completed' : ''}}"
+            data-id="{{item.id}}"
+          >
+            <view class="habit-item-content">
+              <text class="habit-item-title">{{item.name}}</text>
+              <text class="habit-item-subtitle">已坚持 {{item.days}} 天</text>
+            </view>
+            <view class="habit-item-check">
+              <view class="habit-check-circle {{item.completed ? 'habit-check-circle-on' : 'habit-check-circle-off'}}">
+                <text wx:if="{{item.completed}}" class="habit-check-mark">✓</text>
+              </view>
+            </view>
+          </view>
+          <view class="habit-delete" data-id="{{item.id}}" catchtap="onDeleteHabit">
+            <text class="habit-delete-icon">🗑</text>
+            <text class="habit-delete-text">删除</text>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view wx:if="{{showAddDialog}}" class="habit-dialog-mask" bindtap="onCloseDialog">
+    <view class="habit-dialog" catchtap="noop">
+      <view class="habit-dialog-title">新建习惯</view>
+      <input
+        class="habit-input"
+        placeholder="输入习惯名称"
+        value="{{newHabitName}}"
+        maxlength="30"
+        bindinput="onHabitNameInput"
+      />
+      <view class="habit-dialog-actions">
+        <view class="habit-dialog-btn habit-dialog-btn-cancel" bindtap="onCancelAdd">取消</view>
+        <view class="habit-dialog-btn habit-dialog-btn-confirm" bindtap="onConfirmAdd">创建</view>
+      </view>
+    </view>
+  </view>
+</view>

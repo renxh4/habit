@@ -1,0 +1,100 @@
+<view class="profile-page">
+  <view class="profile-header">
+    <text class="profile-header-title">个人中心</text>
+  </view>
+
+  <view class="profile-main">
+    <view wx:if="{{!loggedIn}}" class="profile-login-card">
+      <view class="profile-login-avatar-wrapper">
+        <image class="profile-login-avatar" src="../../images/avatar.png" mode="aspectFill" />
+      </view>
+      <text class="profile-login-title">还未登录</text>
+      <text class="profile-login-subtitle">登录后同步你的习惯数据</text>
+      <button
+        class="profile-login-button"
+        bindtap="onTapLogin"
+        open-type="getUserInfo"
+        bindgetuserinfo="onGetUserInfo"
+      >
+        微信登录
+      </button>
+    </view>
+
+    <view wx:elif="{{loggedIn}}">
+      <view class="profile-info">
+        <view class="profile-avatar-wrapper">
+          <button
+            class="profile-avatar-button"
+            open-type="chooseAvatar"
+            bindchooseavatar="onChooseAvatar"
+          >
+            <image class="profile-avatar" src="{{userInfo.avatarUrl || '../../images/avatar.png'}}" mode="aspectFill" />
+          </button>
+        </view>
+        <view class="profile-name-block">
+          <text class="profile-name">{{userInfo.nickName || '微信用户'}}</text>
+          <input
+            class="profile-name-input"
+            type="nickname"
+            placeholder="请输入昵称"
+            value="{{userInfo.nickName}}"
+            bindblur="onChangeNickName"
+          />
+          <text class="profile-motto">自律给我自由</text>
+        </view>
+      </view>
+
+      <view class="profile-stats">
+        <view class="profile-stat-card">
+          <text class="profile-stat-number">{{stats.totalHabits}}</text>
+          <text class="profile-stat-label">习惯养成</text>
+        </view>
+        <view class="profile-stat-card">
+          <text class="profile-stat-number">{{stats.successRate}}%</text>
+          <text class="profile-stat-label">成功率</text>
+        </view>
+      </view>
+
+      <view class="profile-menu">
+        <view class="profile-menu-item">
+          <view class="profile-menu-left">
+            <view class="profile-menu-icon-circle">
+              <image class="profile-menu-icon" src="../../images/icons/usercenter.png" mode="aspectFit" />
+            </view>
+            <text class="profile-menu-text">账号管理</text>
+          </view>
+          <image class="profile-menu-arrow" src="../../images/arrow.svg" mode="aspectFit" />
+        </view>
+
+        <view class="profile-menu-item">
+          <view class="profile-menu-left">
+            <view class="profile-menu-icon-circle">
+              <image class="profile-menu-icon" src="../../images/icons/setting.svg" mode="aspectFit" />
+            </view>
+            <text class="profile-menu-text">系统设置</text>
+          </view>
+          <image class="profile-menu-arrow" src="../../images/arrow.svg" mode="aspectFit" />
+        </view>
+
+        <view class="profile-menu-item">
+          <view class="profile-menu-left">
+            <view class="profile-menu-icon-circle">
+              <image class="profile-menu-icon" src="../../images/icons/question.svg" mode="aspectFit" />
+            </view>
+            <text class="profile-menu-text">隐私安全</text>
+          </view>
+          <image class="profile-menu-arrow" src="../../images/arrow.svg" mode="aspectFit" />
+        </view>
+
+        <view class="profile-menu-item profile-menu-item-danger" bindtap="onTapLogout">
+          <view class="profile-menu-left">
+            <view class="profile-menu-icon-circle profile-menu-icon-circle-danger">
+              <image class="profile-menu-icon" src="../../images/icons/close.png" mode="aspectFit" />
+            </view>
+            <text class="profile-menu-text profile-menu-text-danger">退出登录</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

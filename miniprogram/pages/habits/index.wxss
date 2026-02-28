@@ -1,0 +1,247 @@
+page {
+  background-color: #f6f8f7;
+}
+
+.habit-page {
+  padding: 80rpx 48rpx 224rpx;
+  box-sizing: border-box;
+}
+
+.habit-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 48rpx;
+}
+
+.habit-header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.habit-header-label {
+  font-size: 28rpx;
+  font-weight: 500;
+  letter-spacing: 4rpx;
+  color: rgba(73, 223, 128, 0.8);
+}
+
+.habit-header-date {
+  margin-top: 8rpx;
+  font-size: 60rpx;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.habit-add-btn {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 9999rpx;
+  background-color: #49df80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(73, 223, 128, 0.3);
+}
+
+.habit-add-plus {
+  font-size: 56rpx;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.habit-section-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.habit-section-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.habit-section-subtitle {
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.habit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+}
+
+.habit-swipe-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.habit-swipe-inner {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  width: calc(100% + 180rpx);
+  transform: translateX(0);
+  transition: transform 0.15s ease-out;
+}
+
+.habit-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 40rpx;
+  border-radius: 32rpx;
+  background-color: #f6f8f7;
+  border-width: 1rpx;
+  border-style: solid;
+  border-color: rgba(73, 223, 128, 0.05);
+}
+
+.habit-delete {
+  width: 180rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f97373;
+  border-radius: 32rpx;
+}
+
+.habit-delete-icon {
+  font-size: 32rpx;
+  color: #ffffff;
+  margin-bottom: 8rpx;
+}
+
+.habit-delete-text {
+  font-size: 26rpx;
+  color: #ffffff;
+}
+
+.habit-item-completed {
+  opacity: 0.9;
+}
+
+.habit-item-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.habit-item-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.habit-item-subtitle {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #49df80;
+}
+
+.habit-item-completed .habit-item-subtitle {
+  color: #94a3b8;
+}
+
+.habit-item-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.habit-check-circle {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 9999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-width: 4rpx;
+  border-style: solid;
+}
+
+.habit-check-circle-on {
+  border-color: rgba(73, 223, 128, 0.3);
+  background-color: #ffffff;
+}
+
+.habit-check-circle-off {
+  border-color: rgba(148, 163, 184, 0.3);
+  background-color: #f6f8f7;
+}
+
+.habit-check-mark {
+  font-size: 40rpx;
+  color: #49df80;
+}
+
+.habit-dialog-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.habit-dialog {
+  width: 600rpx;
+  border-radius: 32rpx;
+  background-color: #ffffff;
+  padding: 48rpx 40rpx 32rpx;
+  box-sizing: border-box;
+}
+
+.habit-dialog-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 32rpx;
+}
+
+.habit-input {
+  width: 100%;
+  padding: 24rpx 28rpx;
+  box-sizing: border-box;
+  border-radius: 24rpx;
+  background-color: #f6f8f7;
+  font-size: 28rpx;
+  color: #0f172a;
+}
+
+.habit-dialog-actions {
+  margin-top: 32rpx;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 24rpx;
+}
+
+.habit-dialog-btn {
+  min-width: 160rpx;
+  padding: 20rpx 32rpx;
+  text-align: center;
+  border-radius: 9999rpx;
+  font-size: 28rpx;
+}
+
+.habit-dialog-btn-cancel {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.habit-dialog-btn-confirm {
+  background-color: #49df80;
+  color: #ffffff;
+}
