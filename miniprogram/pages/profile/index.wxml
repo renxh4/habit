@@ -61,16 +61,6 @@
           </view>
           <image class="profile-menu-arrow" src="../../images/arrow.svg" mode="aspectFit" />
         </view>
-
-        <view class="profile-menu-item">
-          <view class="profile-menu-left">
-            <view class="profile-menu-icon-circle">
-              <image class="profile-menu-icon" src="../../images/icons/question.svg" mode="aspectFit" />
-            </view>
-            <text class="profile-menu-text">隐私安全</text>
-          </view>
-          <image class="profile-menu-arrow" src="../../images/arrow.svg" mode="aspectFit" />
-        </view>
       </view>
     </view>
   </view>
