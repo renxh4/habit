@@ -52,6 +52,16 @@
       </view>
 
       <view class="profile-menu">
+        <view class="profile-menu-item" bindtap="onTapSubscribeReminder">
+          <view class="profile-menu-left">
+            <view class="profile-menu-icon-circle">
+              <image class="profile-menu-icon" src="../../images/icons/question.svg" mode="aspectFit" />
+            </view>
+            <text class="profile-menu-text">打卡提醒</text>
+          </view>
+          <image class="profile-menu-arrow" src="../../images/arrow.svg" mode="aspectFit" />
+        </view>
+
         <view class="profile-menu-item">
           <view class="profile-menu-left">
             <view class="profile-menu-icon-circle">
@@ -60,15 +70,6 @@
             <text class="profile-menu-text">隐私安全</text>
           </view>
           <image class="profile-menu-arrow" src="../../images/arrow.svg" mode="aspectFit" />
-        </view>
-
-        <view class="profile-menu-item profile-menu-item-danger" bindtap="onTapLogout">
-          <view class="profile-menu-left">
-            <view class="profile-menu-icon-circle profile-menu-icon-circle-danger">
-              <image class="profile-menu-icon" src="../../images/icons/close.png" mode="aspectFit" />
-            </view>
-            <text class="profile-menu-text profile-menu-text-danger">退出登录</text>
-          </view>
         </view>
       </view>
     </view>

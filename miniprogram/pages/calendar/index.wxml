@@ -18,7 +18,7 @@
     <view class="calendar-grid">
       <block wx:for="{{days}}" wx:key="dateKey">
         <view
-          class="calendar-day {{item.isCurrentMonth ? '' : 'calendar-day-out'}} {{item.isToday ? 'calendar-day-today' : ''}} {{item.hasCheck ? 'calendar-day-has-check' : ''}}"
+          class="calendar-day {{item.isCurrentMonth ? '' : 'calendar-day-out'}} {{item.isToday ? 'calendar-day-today' : ''}} {{item.hasCheck ? 'calendar-day-has-check' : ''}} {{item.isSelected ? 'calendar-day-selected' : ''}}"
           data-date="{{item.dateKey}}"
           bindtap="onSelectDate"
         >
@@ -35,9 +35,18 @@
     </view>
     <view class="calendar-habits-list">
       <block wx:for="{{selectedHabits}}" wx:key="id">
-        <view class="calendar-habit-item">
-          <view class="calendar-habit-dot {{item.completed ? 'calendar-habit-dot-on' : ''}}"></view>
-          <text class="calendar-habit-name">{{item.name}}</text>
+        <view class="calendar-habit-item {{item.completed ? 'calendar-habit-item-on' : 'calendar-habit-item-off'}}">
+          <view class="calendar-habit-icon {{item.completed ? 'calendar-habit-icon-on' : 'calendar-habit-icon-off'}}">
+            <text wx:if="{{item.completed}}" class="calendar-habit-icon-check">✓</text>
+          </view>
+          <view class="calendar-habit-main">
+            <text class="calendar-habit-name {{item.completed ? 'calendar-habit-name-on' : 'calendar-habit-name-off'}}">
+              {{item.name}}
+            </text>
+            <text wx:if="{{item.time}}" class="calendar-habit-time">
+              {{item.time}}
+            </text>
+          </view>
         </view>
       </block>
       <view wx:if="{{!selectedHabits.length}}" class="calendar-habits-empty">

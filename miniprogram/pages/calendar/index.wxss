@@ -92,6 +92,12 @@ page {
 }
 
 .calendar-day-today .calendar-day-text {
+  border-width: 2rpx;
+  border-style: solid;
+  border-color: #22c55e;
+}
+
+.calendar-day-selected .calendar-day-text {
   background-color: #22c55e;
   color: #ffffff;
 }
@@ -132,23 +138,80 @@ page {
   display: flex;
   flex-direction: row;
   align-items: center;
+  padding: 16rpx 24rpx;
+  min-height: 80rpx;
+  border-radius: 24rpx;
 }
 
-.calendar-habit-dot {
-  width: 16rpx;
-  height: 16rpx;
+.calendar-habit-item-on {
+  background-color: #ecfdf3;
+}
+
+.calendar-habit-item-off {
+  background-color: #ffffff;
+  border-width: 1rpx;
+  border-style: solid;
+  border-color: #e2e8f0;
+}
+
+.calendar-habit-icon {
+  width: 32rpx;
+  height: 32rpx;
   border-radius: 9999rpx;
-  margin-right: 16rpx;
-  background-color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12rpx;
+  flex-shrink: 0;
 }
 
-.calendar-habit-dot-on {
+.calendar-habit-icon-on {
   background-color: #22c55e;
 }
 
+.calendar-habit-icon-off {
+  border-width: 4rpx;
+  border-style: solid;
+  border-color: #e2e8f0;
+  box-sizing: border-box;
+}
+
+.calendar-habit-icon-check {
+  font-size: 20rpx;
+  line-height: 32rpx;
+  color: #ffffff;
+}
+
+.calendar-habit-main {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  transform: translateY(-25rpx);
+}
+
 .calendar-habit-name {
+  display: block;
+  height: 32rpx;
   font-size: 28rpx;
+  line-height: 28rpx;
+}
+
+.calendar-habit-name-on {
   color: #0f172a;
+}
+
+.calendar-habit-name-off {
+  color: #0f172a;
+}
+
+.calendar-habit-time {
+  display: block;
+  height: 32rpx;
+  font-size: 24rpx;
+  line-height: 28rpx;
+  color: #94a3b8;
 }
 
 .calendar-habits-empty {

@@ -258,6 +258,76 @@ const upsertUser = async (event) => {
   };
 };
 
+const sendHabitReminder = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const templateId = event && event.templateId;
+  if (!templateId) {
+    return {
+      success: false,
+      errMsg: "missing templateId",
+    };
+  }
+  const pad = (n) => (n < 10 ? `0${n}` : `${n}`);
+  const now = new Date();
+  const datePart = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
+    now.getDate()
+  )}`;
+  const timePart = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  await cloud.openapi.subscribeMessage.send({
+    touser: wxContext.OPENID,
+    templateId,
+    page: "pages/habits/index",
+    data: {
+      date2: {
+        value: datePart,
+      },
+      thing3: {
+        value: "今日习惯打卡提醒",
+      },
+      time11: {
+        value: timePart,
+      },
+      phrase5: {
+        value: "习惯打卡",
+      },
+      thing10: {
+        value: "打卡",
+      },
+    },
+  });
+  return {
+    success: true,
+  };
+};
+
+const getUserProfile = async () => {
+  const wxContext = cloud.getWXContext();
+  const res = await usersCollection
+    .where({
+      _openid: wxContext.OPENID,
+    })
+    .limit(1)
+    .get();
+  if (!res.data || !res.data.length) {
+    return {
+      success: true,
+      data: null,
+    };
+  }
+  const doc = res.data[0];
+  return {
+    success: true,
+    data: {
+      nickName: doc.nickName || "",
+      avatarUrl: doc.avatarUrl || "",
+      gender: doc.gender,
+      country: doc.country,
+      province: doc.province,
+      city: doc.city,
+    },
+  };
+};
+
 // const getOpenId = require('./getOpenId/index');
 // const getMiniProgramCode = require('./getMiniProgramCode/index');
 // const createCollection = require('./createCollection/index');
@@ -288,5 +358,9 @@ exports.main = async (event, context) => {
       return await saveHabitState(event);
     case "upsertUser":
       return await upsertUser(event);
+    case "getUserProfile":
+      return await getUserProfile(event);
+    case "sendHabitReminder":
+      return await sendHabitReminder(event);
   }
 };

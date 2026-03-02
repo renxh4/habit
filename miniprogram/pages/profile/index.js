@@ -1,3 +1,5 @@
+const REMINDER_TEMPLATE_ID = "siFWEoBkxvgPO8HjBUxPGvc55Z3skgZ7WLB9g5U1gYM";
+
 Page({
   data: {
     loggedIn: false,
@@ -85,7 +87,7 @@ Page({
       success: (res) => {
         console.log("profile onTapLogin getUserProfile success", res);
         const info = res.userInfo || {};
-        this.handleUserInfo(info);
+        this.afterLogin(info);
       },
       fail: (err) => {
         console.log("profile onTapLogin getUserProfile fail", err);
@@ -110,6 +112,10 @@ Page({
       return;
     }
     console.log("profile onGetUserInfo got userInfo", info);
+    this.afterLogin(info);
+  },
+
+  afterLogin(info) {
     this.handleUserInfo(info);
   },
 
@@ -122,55 +128,6 @@ Page({
       userInfo: info
     });
     console.log("profile handleUserInfo state updated to loggedIn");
-    if (wx.cloud) {
-      const app = getApp();
-      console.log("profile handleUserInfo wx.cloud available, app.globalData", app && app.globalData);
-      if (app && app.globalData && app.globalData.env) {
-        console.log("profile handleUserInfo env set, preparing to sync to cloud");
-        const habits = wx.getStorageSync("habits") || [];
-        const habitLogs = wx.getStorageSync("habitLogs") || {};
-        console.log("profile handleUserInfo local habits", habits);
-        console.log("profile handleUserInfo local habitLogs", habitLogs);
-        wx.cloud
-          .callFunction({
-            name: "quickstartFunctions",
-            data: {
-              type: "upsertUser",
-              data: {
-                userInfo: info
-              }
-            }
-          })
-          .then((res) => {
-            console.log("profile handleUserInfo upsertUser success", res);
-          })
-          .catch((err) => {
-            console.log("profile handleUserInfo upsertUser fail", err);
-          });
-        wx.cloud
-          .callFunction({
-            name: "quickstartFunctions",
-            data: {
-              type: "saveHabitState",
-              data: {
-                habits,
-                habitLogs,
-                userInfo: info
-              }
-            }
-          })
-          .then((res) => {
-            console.log("profile handleUserInfo saveHabitState success", res);
-          })
-          .catch((err) => {
-            console.log("profile handleUserInfo saveHabitState fail", err);
-          });
-      } else {
-        console.log("profile handleUserInfo env not set, skip cloud sync");
-      }
-    } else {
-      console.log("profile handleUserInfo wx.cloud not available, skip cloud sync");
-    }
   },
 
   onChooseAvatar(e) {
@@ -187,6 +144,62 @@ Page({
     this.handleUserInfo(merged);
   },
 
+  onTapSubscribeReminder() {
+    if (!wx.requestSubscribeMessage) {
+      wx.showToast({
+        title: "当前微信版本不支持订阅消息",
+        icon: "none",
+      });
+      return;
+    }
+    wx.requestSubscribeMessage({
+      tmplIds: [REMINDER_TEMPLATE_ID],
+      success: (res) => {
+        const status = res[REMINDER_TEMPLATE_ID];
+        if (status === "accept") {
+          if (!wx.cloud) {
+            wx.showToast({
+              title: "云环境未配置",
+              icon: "none",
+            });
+            return;
+          }
+          wx.cloud
+            .callFunction({
+              name: "quickstartFunctions",
+              data: {
+                type: "sendHabitReminder",
+                templateId: REMINDER_TEMPLATE_ID,
+              },
+            })
+            .then(() => {
+              wx.showToast({
+                title: "提醒已发送",
+                icon: "none",
+              });
+            })
+            .catch(() => {
+              wx.showToast({
+                title: "发送失败",
+                icon: "none",
+              });
+            });
+        } else {
+          wx.showToast({
+            title: "已取消授权",
+            icon: "none",
+          });
+        }
+      },
+      fail: () => {
+        wx.showToast({
+          title: "请求订阅失败",
+          icon: "none",
+        });
+      },
+    });
+  },
+
   onChangeNickName(e) {
     console.log("profile onChangeNickName", e);
     const value = (e.detail && e.detail.value) || "";
@@ -199,27 +212,5 @@ Page({
       nickName: name
     });
     this.handleUserInfo(merged);
-  },
-
-  onTapLogout() {
-    console.log("profile onTapLogout clicked");
-    wx.showModal({
-      title: "确认退出登录",
-      content: "退出后将不再展示你的头像和昵称，习惯数据仍保留在云端。",
-      confirmText: "退出登录",
-      cancelText: "取消",
-      success: (res) => {
-        if (!res.confirm) {
-          console.log("profile onTapLogout user cancelled");
-          return;
-        }
-        console.log("profile onTapLogout confirmed, clearing local userInfo");
-        wx.removeStorageSync("userInfo");
-        this.setData({
-          loggedIn: false,
-          userInfo: null
-        });
-      }
-    });
   }
 });

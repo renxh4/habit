@@ -38,21 +38,21 @@
   </view>
 
   <view wx:if="{{showAddDialog}}" class="habit-dialog-mask" bindtap="onCloseDialog">
-    <view class="habit-dialog" catchtap="noop">
-      <view class="habit-dialog-title">新建习惯</view>
-      <input
-        class="habit-input"
+      <view class="habit-dialog" catchtap="noop">
+        <view class="habit-dialog-title">新建习惯</view>
+        <input
+          class="habit-input"
           placeholder="输入习惯名称"
           placeholder-style="color:#94a3b8;font-size:28rpx"
           type="text"
           focus="{{showAddDialog}}"
           confirm-type="done"
           cursor-spacing="32"
-        value="{{newHabitName}}"
-        maxlength="30"
-        bindinput="onHabitNameInput"
-      />
-      <view class="habit-dialog-actions">
+          value="{{newHabitName}}"
+          maxlength="30"
+          bindinput="onHabitNameInput"
+        />
+        <view class="habit-dialog-actions">
         <view class="habit-dialog-btn habit-dialog-btn-cancel" bindtap="onCancelAdd">取消</view>
         <view class="habit-dialog-btn habit-dialog-btn-confirm" bindtap="onConfirmAdd">创建</view>
       </view>

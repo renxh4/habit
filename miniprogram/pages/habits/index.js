@@ -9,19 +9,23 @@ Page({
 
   onLoad() {
     this.initDate();
+  },
+
+  onShow() {
     this.loadState();
   },
 
   getCloudEnv() {
-    const app = getApp();
-    if (!app || !app.globalData || !app.globalData.env) {
-      return "";
-    }
-    return app.globalData.env;
+    return "";
+  },
+ 
+  isCloudAvailable() {
+    return false;
   },
 
-  isCloudAvailable() {
-    return !!wx.cloud && !!this.getCloudEnv();
+  isLoggedIn() {
+    const info = wx.getStorageSync("userInfo");
+    return !!(info && info.nickName);
   },
 
   initDate() {
@@ -46,6 +50,14 @@ Page({
     return this.formatDateKey(new Date());
   },
 
+  formatTime(date) {
+    const h = date.getHours();
+    const m = date.getMinutes();
+    const hh = h < 10 ? `0${h}` : `${h}`;
+    const mm = m < 10 ? `0${m}` : `${m}`;
+    return `${hh}:${mm}`;
+  },
+
   ensureInitialData() {
     const storedHabits = wx.getStorageSync("habits");
     if (!storedHabits || !Array.isArray(storedHabits)) {
@@ -58,34 +70,15 @@ Page({
   },
 
   loadState() {
-    if (!this.isCloudAvailable()) {
-      this.ensureInitialData();
-      this.refreshHabits();
+    if (!this.isLoggedIn()) {
+      this.setData({
+        habits: [],
+        pendingCount: 0
+      });
       return;
     }
-    wx.cloud
-      .callFunction({
-        name: "quickstartFunctions",
-        data: {
-          type: "getHabitState",
-        },
-      })
-      .then((res) => {
-        const result = res.result || {};
-        if (result.success && result.data) {
-          const habits = result.data.habits || [];
-          const habitLogs = result.data.habitLogs || {};
-          wx.setStorageSync("habits", habits);
-          wx.setStorageSync("habitLogs", habitLogs);
-        } else {
-          this.ensureInitialData();
-        }
-        this.refreshHabits();
-      })
-      .catch(() => {
-        this.ensureInitialData();
-        this.refreshHabits();
-      });
+    this.ensureInitialData();
+    this.refreshHabits();
   },
 
   loadBaseHabits() {
@@ -109,25 +102,7 @@ Page({
   },
 
   saveStateToCloud() {
-    if (!this.isCloudAvailable()) {
-      return;
-    }
-    const habits = this.loadBaseHabits();
-    const habitLogs = this.loadLogs();
-    const userInfo = wx.getStorageSync("userInfo") || null;
-    wx.cloud
-      .callFunction({
-        name: "quickstartFunctions",
-        data: {
-          type: "saveHabitState",
-          data: {
-            habits,
-            habitLogs,
-            userInfo,
-          },
-        },
-      })
-      .catch(() => {});
+    return;
   },
 
   getPendingCount(habits) {
@@ -166,7 +141,7 @@ Page({
     if (dayLog[id]) {
       delete dayLog[id];
     } else {
-      dayLog[id] = true;
+      dayLog[id] = this.formatTime(new Date());
     }
     logs[todayKey] = dayLog;
     wx.setStorageSync("habitLogs", logs);
@@ -174,11 +149,25 @@ Page({
   },
 
   onToggleHabit(e) {
+    if (!this.isLoggedIn()) {
+      wx.showToast({
+        title: "请先登录后再打卡",
+        icon: "none"
+      });
+      return;
+    }
     const id = Number(e.currentTarget.dataset.id);
     this.toggleTodayForHabit(id);
     this.refreshHabits();
   },
   onLongPressHabit(e) {
+    if (!this.isLoggedIn()) {
+      wx.showToast({
+        title: "请先登录后再编辑习惯",
+        icon: "none"
+      });
+      return;
+    }
     const id = Number(e.currentTarget.dataset.id);
     const habits = this.data.habits || [];
     const target = habits.find((item) => item.id === id) || null;
@@ -219,6 +208,13 @@ Page({
   },
 
   onAddHabit() {
+    if (!this.isLoggedIn()) {
+      wx.showToast({
+        title: "请先登录后再创建习惯",
+        icon: "none"
+      });
+      return;
+    }
     this.setData({
       showAddDialog: true,
       newHabitName: ""
@@ -239,6 +235,13 @@ Page({
   },
 
   onConfirmAdd() {
+    if (!this.isLoggedIn()) {
+      wx.showToast({
+        title: "请先登录后再创建习惯",
+        icon: "none"
+      });
+      return;
+    }
     const name = (this.data.newHabitName || "").trim();
     if (!name) {
       wx.showToast({

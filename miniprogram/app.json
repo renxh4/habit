@@ -2,9 +2,7 @@
   "pages": [
     "pages/habits/index",
     "pages/calendar/index",
-    "pages/profile/index",
-    "pages/index/index",
-    "pages/example/index"
+    "pages/profile/index"
   ],
   "window": {
     "backgroundColor": "#F6F8F7",

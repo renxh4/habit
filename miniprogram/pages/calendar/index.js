@@ -15,84 +15,28 @@ Page({
   },
 
   onShow() {
-    if (!this.data.year || !this.data.month) {
-      return;
-    }
-    if (this.isCloudAvailable()) {
-      wx.cloud
-        .callFunction({
-          name: "quickstartFunctions",
-          data: {
-            type: "getHabitState",
-          },
-        })
-        .then((res) => {
-          const result = res.result || {};
-          if (result.success && result.data) {
-            const habits = result.data.habits || [];
-            const habitLogs = result.data.habitLogs || {};
-            wx.setStorageSync("habits", habits);
-            wx.setStorageSync("habitLogs", habitLogs);
-          }
-          const logs = this.loadLogs();
-          this.buildDays(this.data.year, this.data.month, logs);
-          if (this.data.selectedDate) {
-            this.updateSelectedDate(this.data.selectedDate, logs);
-          }
-        })
-        .catch(() => {
-          const logs = this.loadLogs();
-          this.buildDays(this.data.year, this.data.month, logs);
-          if (this.data.selectedDate) {
-            this.updateSelectedDate(this.data.selectedDate, logs);
-          }
-        });
-    } else {
-      const logs = this.loadLogs();
-      this.buildDays(this.data.year, this.data.month, logs);
-      if (this.data.selectedDate) {
-        this.updateSelectedDate(this.data.selectedDate, logs);
-      }
-    }
+    this.loadStateAndInit();
   },
 
   getCloudEnv() {
-    const app = getApp();
-    if (!app || !app.globalData || !app.globalData.env) {
-      return "";
-    }
-    return app.globalData.env;
+    return "";
   },
 
   isCloudAvailable() {
-    return !!wx.cloud && !!this.getCloudEnv();
+    return false;
+  },
+
+  isLoggedIn() {
+    const info = wx.getStorageSync("userInfo");
+    return !!(info && info.nickName);
   },
 
   loadStateAndInit() {
-    if (!this.isCloudAvailable()) {
+    if (!this.isLoggedIn()) {
       this.initCalendar();
       return;
     }
-    wx.cloud
-      .callFunction({
-        name: "quickstartFunctions",
-        data: {
-          type: "getHabitState",
-        },
-      })
-      .then((res) => {
-        const result = res.result || {};
-        if (result.success && result.data) {
-          const habits = result.data.habits || [];
-          const habitLogs = result.data.habitLogs || {};
-          wx.setStorageSync("habits", habits);
-          wx.setStorageSync("habitLogs", habitLogs);
-        }
-        this.initCalendar();
-      })
-      .catch(() => {
-        this.initCalendar();
-      });
+    this.initCalendar();
   },
 
   formatDateKey(date) {
@@ -155,7 +99,8 @@ Page({
         dateKey,
         isCurrentMonth: false,
         isToday: dateKey === todayKey,
-        hasCheck
+        hasCheck,
+        isSelected: false
       });
     }
 
@@ -168,7 +113,8 @@ Page({
         dateKey,
         isCurrentMonth: true,
         isToday: dateKey === todayKey,
-        hasCheck
+        hasCheck,
+        isSelected: false
       });
     }
 
@@ -186,7 +132,8 @@ Page({
         dateKey,
         isCurrentMonth: false,
         isToday: dateKey === todayKey,
-        hasCheck
+        hasCheck,
+        isSelected: false
       });
     }
 
@@ -248,20 +195,32 @@ Page({
     const logs = logsOverride || this.loadLogs();
     const habits = this.loadBaseHabits();
     const dayLog = logs[dateKey] || {};
-    const selectedHabits = habits.map((item) => ({
-      id: item.id,
-      name: item.name,
-      completed: !!dayLog[item.id]
-    }));
+    const selectedHabits = habits.map((item) => {
+      const logValue = dayLog[item.id];
+      const completed = !!logValue;
+      const time = typeof logValue === "string" ? logValue : "";
+      return {
+        id: item.id,
+        name: item.name,
+        time,
+        completed
+      };
+    });
     const doneCount = selectedHabits.filter((h) => h.completed).length;
     const summary = selectedHabits.length
       ? `已打卡 ${doneCount} 个习惯`
       : "暂无习惯";
+    const days = (this.data.days || []).map((item) =>
+      Object.assign({}, item, {
+        isSelected: item.dateKey === dateKey
+      })
+    );
     this.setData({
       selectedDate: dateKey,
       selectedDateText: dateText,
       selectedDateSummary: summary,
-      selectedHabits
+      selectedHabits,
+      days
     });
   }
 });
