@@ -189,6 +189,45 @@ page {
   color: #0f172a;
 }
 
+.habit-remind-row {
+  margin-top: 24rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.habit-remind-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.habit-remind-label {
+  font-size: 28rpx;
+  color: #0f172a;
+}
+
+.habit-remind-time-row {
+  margin-top: 16rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.habit-remind-time-label {
+  font-size: 26rpx;
+  color: #64748b;
+}
+
+.habit-remind-time-value {
+  padding: 12rpx 24rpx;
+  border-radius: 9999rpx;
+  background-color: #f1f5f9;
+  font-size: 26rpx;
+  color: #0f172a;
+}
+
 .habit-dialog-actions {
   margin-top: 32rpx;
   display: flex;

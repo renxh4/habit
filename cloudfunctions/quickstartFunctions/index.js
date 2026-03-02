@@ -3,9 +3,14 @@ cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
 });
 
+const REMINDER_TEMPLATE_ID =
+  "siFWEoBkxvgPO8HjBUxPGvc55Z3skgZ7WLB9g5U1gYM";
+
 const db = cloud.database();
+const _ = db.command;
 const habitStateCollection = db.collection("habit_state");
 const usersCollection = db.collection("users");
+const habitRemindersCollection = db.collection("habit_reminders");
 // 获取openid
 const getOpenId = async () => {
   // 获取基础信息
@@ -221,6 +226,226 @@ const saveHabitState = async (event) => {
   };
 };
 
+const upsertHabitReminder = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const payload = event.data || {};
+  const habitId = payload.habitId;
+  if (typeof habitId !== "number" && typeof habitId !== "string") {
+    return {
+      success: false,
+      errMsg: "invalid habitId",
+    };
+  }
+  const active = !!payload.active;
+  const remindTime = payload.remindTime || "";
+  let remindMinutes = null;
+  if (remindTime && typeof remindTime === "string") {
+    const parts = remindTime.split(":");
+    if (parts.length === 2) {
+      const h = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      if (!Number.isNaN(h) && !Number.isNaN(m)) {
+        remindMinutes = h * 60 + m;
+      }
+    }
+  }
+  const now = new Date();
+  const res = await habitRemindersCollection
+    .where({
+      _openid: wxContext.OPENID,
+      habitId,
+    })
+    .limit(1)
+    .get();
+  const base = {
+    active,
+    updatedAt: now,
+  };
+  if (remindMinutes !== null) {
+    base.remindTime = remindTime;
+    base.remindMinutes = remindMinutes;
+  }
+  if (!res.data || !res.data.length) {
+    await habitRemindersCollection.add({
+      data: {
+        _openid: wxContext.OPENID,
+        habitId,
+        active,
+        remindTime: remindTime || "",
+        remindMinutes: remindMinutes !== null ? remindMinutes : 0,
+        lastSentDate: "",
+        createdAt: now,
+        updatedAt: now,
+      },
+    });
+  } else {
+    await habitRemindersCollection.doc(res.data[0]._id).update({
+      data: base,
+    });
+  }
+  return {
+    success: true,
+  };
+};
+
+const sendDailyReminders = async (event) => {
+  const templateId =
+    (event && event.templateId) || REMINDER_TEMPLATE_ID;
+  const pad = (n) => (n < 10 ? `0${n}` : `${n}`);
+  const now = new Date();
+  const local = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  const today = `${local.getFullYear()}-${pad(local.getMonth() + 1)}-${pad(
+    local.getDate()
+  )}`;
+  const localHours = local.getHours();
+  const currentMinutes = localHours * 60 + local.getMinutes();
+  const windowSize = (event && event.windowMinutes) || 10;
+  const half = Math.floor(windowSize / 2);
+  const start = currentMinutes - half;
+  const end = currentMinutes + half;
+  let res;
+  try {
+    res = await habitRemindersCollection
+      .where({
+        active: true,
+        remindMinutes: _.gte(start).and(_.lte(end)),
+        lastSentDate: _.neq(today),
+      })
+      .get();
+  } catch (e) {
+    const code = e && (e.errCode || e.code || e.message || "");
+    const msg = typeof code === "string" ? code : "";
+    if (
+      (e && e.errCode === -502005) ||
+      msg.indexOf("collection not exists") >= 0 ||
+      msg.indexOf("Db or Table not exist") >= 0 ||
+      msg.indexOf("DATABASE_COLLECTION_NOT_EXIST") >= 0
+    ) {
+      await db.createCollection("habit_reminders");
+      console.log("sendDailyReminders created collection", {
+        today,
+        currentMinutes,
+      });
+      return {
+        success: true,
+        data: {
+          sent: 0,
+          createdCollection: true,
+          reason: "collectionCreated",
+        },
+      };
+    }
+    throw e;
+  }
+  const total = (res && res.data && res.data.length) || 0;
+  if (!total) {
+    console.log("sendDailyReminders no reminders in window", {
+      today,
+      currentMinutes,
+      start,
+      end,
+    });
+    return {
+      success: true,
+      data: {
+        sent: 0,
+        total: 0,
+        reason: "noRemindersInWindow",
+      },
+    };
+  }
+  const byUser = {};
+  res.data.forEach((doc) => {
+    const openid = doc._openid;
+    if (!byUser[openid]) {
+      byUser[openid] = [];
+    }
+    byUser[openid].push(doc);
+  });
+  const userCount = Object.keys(byUser).length;
+  let sentCount = 0;
+  let failCount = 0;
+  const allUpdates = [];
+  for (const openid of Object.keys(byUser)) {
+    const list = byUser[openid];
+    const any = list[0];
+    const timeValue =
+      any && typeof any.remindTime === "string" && any.remindTime
+        ? any.remindTime
+        : `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    try {
+      await cloud.openapi.subscribeMessage.send({
+        touser: openid,
+        templateId,
+        page: "pages/habits/index",
+        data: {
+          date2: {
+            value: today,
+          },
+          thing3: {
+            value: `今日有${list.length}个习惯待打卡`,
+          },
+          time11: {
+            value: timeValue,
+          },
+          phrase5: {
+            value: "习惯打卡",
+          },
+          thing10: {
+            value: "打卡",
+          },
+        },
+      });
+      sentCount += 1;
+      list.forEach((doc) => {
+        allUpdates.push(
+          habitRemindersCollection.doc(doc._id).update({
+            data: {
+              lastSentDate: today,
+            },
+          })
+        );
+      });
+    } catch (e) {
+      failCount += 1;
+      console.error("sendDailyReminders send error", {
+        openid,
+        today,
+        currentMinutes,
+        error: e,
+      });
+    }
+  }
+  if (allUpdates.length) {
+    await Promise.all(allUpdates);
+  }
+  console.log("sendDailyReminders finished", {
+    today,
+    currentMinutes,
+    start,
+    end,
+    total,
+    userCount,
+    sentCount,
+    failCount,
+  });
+  return {
+    success: true,
+    data: {
+      sent: sentCount,
+      total,
+      userCount,
+      failCount,
+      reason:
+        sentCount > 0
+          ? "ok"
+          : failCount > 0
+          ? "sendFailed"
+          : "noSendTarget",
+    },
+  };
+};
+
 const upsertUser = async (event) => {
   const wxContext = cloud.getWXContext();
   const payload = event.data || {};
@@ -335,8 +560,20 @@ const getUserProfile = async () => {
 // const updateRecord = require('./updateRecord/index');
 // const fetchGoodsList = require('./fetchGoodsList/index');
 // const genMpQrcode = require('./genMpQrcode/index');
-// 云函数入口函数
-exports.main = async (event, context) => {
+exports.main = async (event) => {
+  const wxContext = cloud.getWXContext();
+  if (!event || !event.type) {
+    if (wxContext.SOURCE === "wx_trigger") {
+      return await sendDailyReminders({
+        templateId: REMINDER_TEMPLATE_ID,
+        windowMinutes: 10,
+      });
+    }
+    return {
+      success: false,
+      errMsg: "missing type",
+    };
+  }
   switch (event.type) {
     case "getOpenId":
       return await getOpenId();
@@ -362,5 +599,9 @@ exports.main = async (event, context) => {
       return await getUserProfile(event);
     case "sendHabitReminder":
       return await sendHabitReminder(event);
+    case "upsertHabitReminder":
+      return await upsertHabitReminder(event);
+    case "sendDailyReminders":
+      return await sendDailyReminders(event);
   }
 };

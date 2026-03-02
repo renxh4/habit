@@ -157,33 +157,10 @@ Page({
       success: (res) => {
         const status = res[REMINDER_TEMPLATE_ID];
         if (status === "accept") {
-          if (!wx.cloud) {
-            wx.showToast({
-              title: "云环境未配置",
-              icon: "none",
-            });
-            return;
-          }
-          wx.cloud
-            .callFunction({
-              name: "quickstartFunctions",
-              data: {
-                type: "sendHabitReminder",
-                templateId: REMINDER_TEMPLATE_ID,
-              },
-            })
-            .then(() => {
-              wx.showToast({
-                title: "提醒已发送",
-                icon: "none",
-              });
-            })
-            .catch(() => {
-              wx.showToast({
-                title: "发送失败",
-                icon: "none",
-              });
-            });
+          wx.showToast({
+            title: "订阅成功，将按提醒时间发送通知",
+            icon: "none",
+          });
         } else {
           wx.showToast({
             title: "已取消授权",

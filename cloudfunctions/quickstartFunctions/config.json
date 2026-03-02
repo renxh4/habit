@@ -1,7 +1,9 @@
 {
-  "permissions": {
-    "openapi": [
-      "wxacode.get"
-    ]
-  }
+  "triggers": [
+    {
+      "name": "habitDailyReminder",
+      "type": "timer",
+      "config": "0 */10 * * * * *"
+    }
+  ]
 }

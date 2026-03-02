@@ -52,6 +52,20 @@
           maxlength="30"
           bindinput="onHabitNameInput"
         />
+        <view class="habit-remind-row">
+          <view class="habit-remind-left">
+            <text class="habit-remind-label">提醒我打卡</text>
+          </view>
+          <switch checked="{{newHabitRemindEnabled}}" bindchange="onToggleNewHabitRemind" />
+        </view>
+        <view wx:if="{{newHabitRemindEnabled}}" class="habit-remind-time-row">
+          <text class="habit-remind-time-label">提醒时间</text>
+          <picker mode="time" value="{{newHabitRemindTime}}" bindchange="onNewHabitRemindTimeChange">
+            <view class="habit-remind-time-value">
+              {{newHabitRemindTime}}
+            </view>
+          </picker>
+        </view>
         <view class="habit-dialog-actions">
         <view class="habit-dialog-btn habit-dialog-btn-cancel" bindtap="onCancelAdd">取消</view>
         <view class="habit-dialog-btn habit-dialog-btn-confirm" bindtap="onConfirmAdd">创建</view>

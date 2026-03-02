@@ -1,10 +1,14 @@
+const REMINDER_TEMPLATE_ID = "siFWEoBkxvgPO8HjBUxPGvc55Z3skgZ7WLB9g5U1gYM";
+
 Page({
   data: {
     dateText: "",
     habits: [],
     pendingCount: 0,
     showAddDialog: false,
-    newHabitName: ""
+    newHabitName: "",
+    newHabitRemindEnabled: false,
+    newHabitRemindTime: "08:00"
   },
 
   onLoad() {
@@ -13,6 +17,7 @@ Page({
 
   onShow() {
     this.loadState();
+    this.maybeRequestDailySubscribe();
   },
 
   getCloudEnv() {
@@ -217,7 +222,9 @@ Page({
     }
     this.setData({
       showAddDialog: true,
-      newHabitName: ""
+      newHabitName: "",
+      newHabitRemindEnabled: false,
+      newHabitRemindTime: "08:00"
     });
   },
 
@@ -227,10 +234,26 @@ Page({
     });
   },
 
+  onToggleNewHabitRemind(e) {
+    const value = !!(e.detail && e.detail.value);
+    this.setData({
+      newHabitRemindEnabled: value
+    });
+  },
+
+  onNewHabitRemindTimeChange(e) {
+    const value = (e.detail && e.detail.value) || "";
+    this.setData({
+      newHabitRemindTime: value || "08:00"
+    });
+  },
+
   onCancelAdd() {
     this.setData({
       showAddDialog: false,
-      newHabitName: ""
+      newHabitName: "",
+      newHabitRemindEnabled: false,
+      newHabitRemindTime: "08:00"
     });
   },
 
@@ -272,14 +295,80 @@ Page({
       name,
       createdAt: this.getTodayKey()
     };
+    if (this.data.newHabitRemindEnabled && this.data.newHabitRemindTime) {
+      newHabit.remindEnabled = true;
+      newHabit.remindTime = this.data.newHabitRemindTime;
+      this.upsertHabitReminderToCloud(newHabit.id, true, this.data.newHabitRemindTime);
+    } else {
+      this.upsertHabitReminderToCloud(newHabit.id, false, "");
+    }
     const nextHabits = baseHabits.concat(newHabit);
     wx.setStorageSync("habits", nextHabits);
+    if (this.data.newHabitRemindEnabled && this.data.newHabitRemindTime) {
+      this.requestSubscribeForReminder();
+    }
     this.setData({
       showAddDialog: false,
-      newHabitName: ""
+      newHabitName: "",
+      newHabitRemindEnabled: false,
+      newHabitRemindTime: "08:00"
     });
     this.refreshHabits();
     this.saveStateToCloud();
+  },
+
+  requestSubscribeForReminder() {
+    if (!wx.requestSubscribeMessage) {
+      return;
+    }
+    wx.requestSubscribeMessage({
+      tmplIds: [REMINDER_TEMPLATE_ID],
+      success: (res) => {
+        const status = res && res[REMINDER_TEMPLATE_ID];
+        if (status === "accept") {
+          wx.showToast({
+            title: "订阅成功，将按提醒时间发送通知",
+            icon: "none"
+          });
+        }
+      }
+    });
+  },
+
+  maybeRequestDailySubscribe() {
+    const app = getApp();
+    if (!app || !app.globalData || !app.globalData.needDailySubscribeRequest) {
+      return;
+    }
+    if (!this.isLoggedIn()) {
+      return;
+    }
+    if (!wx.requestSubscribeMessage) {
+      return;
+    }
+    app.globalData.needDailySubscribeRequest = false;
+    this.requestSubscribeForReminder();
+  },
+
+  upsertHabitReminderToCloud(habitId, active, remindTime) {
+    if (!wx.cloud) {
+      return;
+    }
+    const app = getApp();
+    if (!app || !app.globalData || !app.globalData.env) {
+      return;
+    }
+    wx.cloud.callFunction({
+      name: "quickstartFunctions",
+      data: {
+        type: "upsertHabitReminder",
+        data: {
+          habitId,
+          active: !!active,
+          remindTime: remindTime || ""
+        }
+      }
+    }).catch(() => {});
   },
 
   onCloseDialog() {
