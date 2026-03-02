@@ -4,19 +4,11 @@ Page({
     habits: [],
     pendingCount: 0,
     showAddDialog: false,
-    newHabitName: "",
-    activeDeleteId: null
+    newHabitName: ""
   },
 
   onLoad() {
     this.initDate();
-    try {
-      const info = wx.getSystemInfoSync();
-      this._rpxPerPx = 750 / (info.windowWidth || 375);
-    } catch (e) {
-      this._rpxPerPx = 2;
-    }
-    this._deleteWidthRpx = 180;
     this.loadState();
   },
 
@@ -155,21 +147,12 @@ Page({
       });
     });
     const todayLogs = logs[todayKey] || {};
-    const currentActiveId = this.data.activeDeleteId;
-    const viewHabits = habits.map((item) => {
-      const id = item.id;
-      const offsetX =
-        currentActiveId === id && this._deleteWidthRpx
-          ? -this._deleteWidthRpx
-          : 0;
-      return {
-        id,
-        name: item.name,
-        days: daysCount[id] || 0,
-        completed: !!todayLogs[id],
-        offsetX
-      };
-    });
+    const viewHabits = habits.map((item) => ({
+      id: item.id,
+      name: item.name,
+      days: daysCount[item.id] || 0,
+      completed: !!todayLogs[item.id]
+    }));
     this.setData({
       habits: viewHabits,
       pendingCount: this.getPendingCount(viewHabits)
@@ -195,101 +178,30 @@ Page({
     this.toggleTodayForHabit(id);
     this.refreshHabits();
   },
-
-  onHabitTouchStart(e) {
-    const touch = e.touches[0] || {};
-    this._habitTouchStartX = touch.clientX || 0;
-    this._habitTouchStartY = touch.clientY || 0;
+  onLongPressHabit(e) {
     const id = Number(e.currentTarget.dataset.id);
-    this._swipeItemId = id;
     const habits = this.data.habits || [];
-    const current = habits.find((item) => item.id === id) || {};
-    this._swipeStartOffset = current.offsetX || 0;
-  },
-
-  onHabitTouchMove(e) {
-    const touch = e.touches[0] || {};
-    const moveX = touch.clientX || 0;
-    const moveY = touch.clientY || 0;
-    const deltaXpx = moveX - (this._habitTouchStartX || 0);
-    const deltaYpx = moveY - (this._habitTouchStartY || 0);
-    if (Math.abs(deltaYpx) > Math.abs(deltaXpx)) {
-      return;
-    }
-    const id = Number(e.currentTarget.dataset.id);
-    if (this._swipeItemId !== id) {
-      return;
-    }
-    const rpxPerPx = this._rpxPerPx || 2;
-    const deltaRpx = deltaXpx * rpxPerPx;
-    const startOffset = this._swipeStartOffset || 0;
-    let offsetX = startOffset + deltaRpx;
-    const min = -(this._deleteWidthRpx || 180);
-    const max = 0;
-    if (offsetX < min) offsetX = min;
-    if (offsetX > max) offsetX = max;
-    this._swipeOffsetRpx = offsetX;
-    const habits = (this.data.habits || []).map((item) =>
-      item.id === id ? Object.assign({}, item, { offsetX }) : item
-    );
-    this.setData({
-      habits
-    });
-  },
-
-  onHabitTouchEnd(e) {
-    const touch = e.changedTouches[0] || {};
-    const endX = touch.clientX || 0;
-    const endY = touch.clientY || 0;
-    const deltaX = endX - (this._habitTouchStartX || 0);
-    const deltaY = endY - (this._habitTouchStartY || 0);
-    const id = Number(e.currentTarget.dataset.id);
-
-    // 纵向滑动视为滚动，不处理
-    if (Math.abs(deltaY) > Math.abs(deltaX)) {
-      return;
-    }
-    const habits = this.data.habits || [];
-    const current = habits.find((item) => item.id === id) || {};
-    const currentOffset = current.offsetX || 0;
-    const half = -(this._deleteWidthRpx || 180) / 2;
-    let targetOffset = 0;
-    let activeDeleteId = this.data.activeDeleteId;
-
-    if (currentOffset <= half || deltaX < -40) {
-      targetOffset = -(this._deleteWidthRpx || 180);
-      activeDeleteId = id;
-    } else if (deltaX > 40) {
-      targetOffset = 0;
-      activeDeleteId = null;
-    } else {
-      targetOffset = 0;
-      activeDeleteId = null;
-      if (Math.abs(deltaX) < 10) {
-        this.onToggleHabit(e);
+    const target = habits.find((item) => item.id === id) || null;
+    const name = target ? target.name : "";
+    const content = name
+      ? `确定删除「${name}」？将删除所有相关打卡记录。`
+      : "确定删除这个习惯？将删除所有相关打卡记录。";
+    wx.showModal({
+      title: "删除习惯",
+      content,
+      confirmText: "删除",
+      cancelText: "取消",
+      confirmColor: "#f97373",
+      success: (res) => {
+        if (!res.confirm) {
+          return;
+        }
+        this.deleteHabitById(id);
       }
-    }
-
-    const nextHabits = habits.map((item) =>
-      item.id === id
-        ? Object.assign({}, item, {
-            offsetX: targetOffset
-          })
-        : item
-    );
-
-    this._swipeItemId = null;
-    this._swipeOffsetRpx = 0;
-    this._swipeStartOffset = 0;
-
-    this.setData({
-      habits: nextHabits,
-      activeDeleteId
     });
   },
 
-  onDeleteHabit(e) {
-    const id = Number(e.currentTarget.dataset.id);
+  deleteHabitById(id) {
     const baseHabits = this.loadBaseHabits();
     const nextHabits = baseHabits.filter((item) => item.id !== id);
     const logs = this.loadLogs();
@@ -302,9 +214,6 @@ Page({
     });
     wx.setStorageSync("habits", nextHabits);
     wx.setStorageSync("habitLogs", logs);
-    this.setData({
-      activeDeleteId: null
-    });
     this.refreshHabits();
     this.saveStateToCloud();
   },
@@ -339,6 +248,18 @@ Page({
       return;
     }
     const baseHabits = this.loadBaseHabits();
+    const lowerName = name.toLowerCase();
+    const exists = baseHabits.some((item) => {
+      const n = (item.name || "").trim().toLowerCase();
+      return n === lowerName;
+    });
+    if (exists) {
+      wx.showToast({
+        title: "该习惯已存在",
+        icon: "none"
+      });
+      return;
+    }
     const maxId = baseHabits.reduce(
       (max, item) => (item.id > max ? item.id : max),
       0

@@ -19,33 +19,18 @@
   <view class="habit-list">
     <block wx:for="{{habits}}" wx:key="id">
       <view
-        class="habit-swipe-item"
+        class="habit-item {{item.completed ? 'habit-item-completed' : ''}}"
         data-id="{{item.id}}"
-        bindtouchstart="onHabitTouchStart"
-        bindtouchmove="onHabitTouchMove"
-        bindtouchend="onHabitTouchEnd"
+        bindtap="onToggleHabit"
+        bindlongpress="onLongPressHabit"
       >
-        <view
-          class="habit-swipe-inner"
-          style="transform: translateX({{item.offsetX || 0}}rpx);"
-        >
-          <view
-            class="habit-item {{item.completed ? 'habit-item-completed' : ''}}"
-            data-id="{{item.id}}"
-          >
-            <view class="habit-item-content">
-              <text class="habit-item-title">{{item.name}}</text>
-              <text class="habit-item-subtitle">已坚持 {{item.days}} 天</text>
-            </view>
-            <view class="habit-item-check">
-              <view class="habit-check-circle {{item.completed ? 'habit-check-circle-on' : 'habit-check-circle-off'}}">
-                <text wx:if="{{item.completed}}" class="habit-check-mark">✓</text>
-              </view>
-            </view>
-          </view>
-          <view class="habit-delete" data-id="{{item.id}}" catchtap="onDeleteHabit">
-            <text class="habit-delete-icon">🗑</text>
-            <text class="habit-delete-text">删除</text>
+        <view class="habit-item-content">
+          <text class="habit-item-title">{{item.name}}</text>
+          <text class="habit-item-subtitle">已坚持 {{item.days}} 天</text>
+        </view>
+        <view class="habit-item-check">
+          <view class="habit-check-circle {{item.completed ? 'habit-check-circle-on' : 'habit-check-circle-off'}}">
+            <text wx:if="{{item.completed}}" class="habit-check-mark">✓</text>
           </view>
         </view>
       </view>
@@ -57,7 +42,12 @@
       <view class="habit-dialog-title">新建习惯</view>
       <input
         class="habit-input"
-        placeholder="输入习惯名称"
+          placeholder="输入习惯名称"
+          placeholder-style="color:#94a3b8;font-size:28rpx"
+          type="text"
+          focus="{{showAddDialog}}"
+          confirm-type="done"
+          cursor-spacing="32"
         value="{{newHabitName}}"
         maxlength="30"
         bindinput="onHabitNameInput"

@@ -73,21 +73,7 @@ page {
 .habit-list {
   display: flex;
   flex-direction: column;
-  gap: 32rpx;
-}
-
-.habit-swipe-item {
-  position: relative;
-  overflow: hidden;
-}
-
-.habit-swipe-inner {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  width: calc(100% + 180rpx);
-  transform: translateX(0);
-  transition: transform 0.15s ease-out;
+  gap: 24rpx;
 }
 
 .habit-item {
@@ -95,34 +81,14 @@ page {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  margin: 0;
   padding: 40rpx;
   border-radius: 32rpx;
-  background-color: #f6f8f7;
+  background-color: #f6fbf8;
   border-width: 1rpx;
   border-style: solid;
-  border-color: rgba(73, 223, 128, 0.05);
-}
-
-.habit-delete {
-  width: 180rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #f97373;
-  border-radius: 32rpx;
-}
-
-.habit-delete-icon {
-  font-size: 32rpx;
-  color: #ffffff;
-  margin-bottom: 8rpx;
-}
-
-.habit-delete-text {
-  font-size: 26rpx;
-  color: #ffffff;
+  border-color: rgba(73, 223, 128, 0.12);
+  box-shadow: 0 8rpx 24rpx rgba(15, 23, 42, 0.04);
 }
 
 .habit-item-completed {
@@ -143,17 +109,18 @@ page {
 .habit-item-subtitle {
   margin-top: 8rpx;
   font-size: 24rpx;
-  color: #49df80;
+  color: #94a3b8;
 }
 
 .habit-item-completed .habit-item-subtitle {
-  color: #94a3b8;
+  color: #22c55e;
 }
 
 .habit-item-check {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-right: 8rpx;
 }
 
 .habit-check-circle {
@@ -169,12 +136,12 @@ page {
 
 .habit-check-circle-on {
   border-color: rgba(73, 223, 128, 0.3);
-  background-color: #ffffff;
+  background-color: #f6fbf8;
 }
 
 .habit-check-circle-off {
-  border-color: rgba(148, 163, 184, 0.3);
-  background-color: #f6f8f7;
+  border-color: rgba(148, 163, 184, 0.2);
+  background-color: #f6fbf8;
 }
 
 .habit-check-mark {
@@ -212,11 +179,13 @@ page {
 
 .habit-input {
   width: 100%;
-  padding: 24rpx 28rpx;
+  height: 80rpx;
+  padding: 0 28rpx;
   box-sizing: border-box;
   border-radius: 24rpx;
   background-color: #f6f8f7;
   font-size: 28rpx;
+  line-height: 80rpx;
   color: #0f172a;
 }
 

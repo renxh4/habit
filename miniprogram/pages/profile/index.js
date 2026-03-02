@@ -3,19 +3,21 @@ Page({
     loggedIn: false,
     userInfo: null,
     stats: {
-      totalHabits: 24,
-      successRate: 95
+      habitCount: 0,
+      successRate: 0
     }
   },
 
   onLoad() {
     console.log("profile onLoad");
     this.loadUserInfo();
+    this.loadStats();
   },
 
   onShow() {
     console.log("profile onShow");
     this.loadUserInfo();
+    this.loadStats();
   },
 
   loadUserInfo() {
@@ -35,6 +37,36 @@ Page({
         userInfo: null
       });
     }
+  },
+
+  loadStats() {
+    const habits = wx.getStorageSync("habits") || [];
+    const habitLogs = wx.getStorageSync("habitLogs") || {};
+    const dates = Object.keys(habitLogs || {});
+    const habitCount = habits.length;
+    let totalCompleted = 0;
+    dates.forEach((dateKey) => {
+      const dayLog = habitLogs[dateKey] || {};
+      const ids = Object.keys(dayLog);
+      if (ids.length > 0) {
+        totalCompleted += ids.length;
+      }
+    });
+    let successRate = 0;
+    if (habits.length > 0 && dates.length > 0) {
+      const totalPossible = habits.length * dates.length;
+      if (totalPossible > 0) {
+        successRate = Math.round((totalCompleted / totalPossible) * 100);
+        if (successRate < 0) successRate = 0;
+        if (successRate > 100) successRate = 100;
+      }
+    }
+    this.setData({
+      stats: {
+        habitCount,
+        successRate
+      }
+    });
   },
 
   onTapLogin() {
