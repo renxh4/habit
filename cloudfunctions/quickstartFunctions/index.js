@@ -226,6 +226,30 @@ const saveHabitState = async (event) => {
   };
 };
 
+const deleteHabitReminderByHabitId = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const payload = event.data || {};
+  const habitId = payload.habitId;
+  if (typeof habitId !== "number" && typeof habitId !== "string") {
+    return {
+      success: false,
+      errMsg: "invalid habitId",
+    };
+  }
+  const res = await habitRemindersCollection
+    .where({
+      _openid: wxContext.OPENID,
+      habitId,
+    })
+    .remove();
+  return {
+    success: true,
+    data: {
+      deleted: (res && res.stats && res.stats.removed) || 0,
+    },
+  };
+};
+
 const upsertHabitReminder = async (event) => {
   const wxContext = cloud.getWXContext();
   const payload = event.data || {};
@@ -601,6 +625,8 @@ exports.main = async (event) => {
       return await sendHabitReminder(event);
     case "upsertHabitReminder":
       return await upsertHabitReminder(event);
+    case "deleteHabitReminderByHabitId":
+      return await deleteHabitReminderByHabitId(event);
     case "sendDailyReminders":
       return await sendDailyReminders(event);
   }

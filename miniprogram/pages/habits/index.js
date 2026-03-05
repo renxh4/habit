@@ -208,6 +208,19 @@ Page({
     });
     wx.setStorageSync("habits", nextHabits);
     wx.setStorageSync("habitLogs", logs);
+    if (wx.cloud) {
+      wx.cloud
+        .callFunction({
+          name: "quickstartFunctions",
+          data: {
+            type: "deleteHabitReminderByHabitId",
+            data: {
+              habitId: id
+            }
+          }
+        })
+        .catch(() => {});
+    }
     this.refreshHabits();
     this.saveStateToCloud();
   },
@@ -336,17 +349,25 @@ Page({
   },
 
   maybeRequestDailySubscribe() {
-    const app = getApp();
-    if (!app || !app.globalData || !app.globalData.needDailySubscribeRequest) {
-      return;
-    }
     if (!this.isLoggedIn()) {
       return;
     }
     if (!wx.requestSubscribeMessage) {
       return;
     }
-    app.globalData.needDailySubscribeRequest = false;
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth() + 1;
+    const d = now.getDate();
+    const mm = m < 10 ? `0${m}` : `${m}`;
+    const dd = d < 10 ? `0${d}` : `${d}`;
+    const today = `${y}-${mm}-${dd}`;
+    const key = "lastDailySubscribeDate";
+    const last = wx.getStorageSync(key);
+    if (last === today) {
+      return;
+    }
+    wx.setStorageSync(key, today);
     this.requestSubscribeForReminder();
   },
 
